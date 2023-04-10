@@ -1,53 +1,44 @@
-import { hexStrArrToStr, toAddress } from './utils';
 import type { CheckpointWriter } from '@snapshot-labs/checkpoint';
+import { convertToDecimal, createPair, getEvent, loadPair, Pair, updatePair } from './utils/utils';
 
-export async function handleDeploy() {
-  // Run logic as at the time Contract was deployed.
-}
+export async function handleSync({ block, tx, rawEvent, mysql }: Parameters<CheckpointWriter>[0]) {
+  if (!rawEvent) return;
+  const format = 'reserve0, reserve1';
+  const data: any = getEvent(rawEvent.data, format);
 
-// This decodes the new_post events data and stores successfully
-// decoded information in the `posts` table.
-//
-// See here for the original logic used to create post transactions:
-// https://gist.github.com/perfectmak/417a4dab69243c517654195edf100ef9#file-index-ts
-export async function handleNewPost({ block, tx, event, mysql }: Parameters<CheckpointWriter>[0]) {
-  if (!event) return;
-
-  const author = toAddress(event.data[0]);
-  let content = '';
-  let tag = '';
-  const contentLength = BigInt(event.data[1]);
-  const tagLength = BigInt(event.data[2 + Number(contentLength)]);
-  const timestamp = block.timestamp;
-  const blockNumber = block.block_number;
-
-  // parse content bytes
-  try {
-    content = hexStrArrToStr(event.data, 2, contentLength);
-  } catch (e) {
-    console.error(`failed to decode content on block [${blockNumber}]: ${e}`);
-    return;
-  }
-
-  // parse tag bytes
-  try {
-    tag = hexStrArrToStr(event.data, 3 + Number(contentLength), tagLength);
-  } catch (e) {
-    console.error(`failed to decode tag on block [${blockNumber}]: ${e}`);
-    return;
-  }
-
-  // post object matches fields of Post type in schema.gql
-  const post = {
-    id: `${author}/${tx.transaction_hash}`,
-    author,
-    content,
-    tag,
-    tx_hash: tx.transaction_hash,
-    created_at: timestamp,
-    created_at_block: blockNumber
+  // Load the pair
+  const pairId = process.env.PAIR!;
+  let pair: Pair = {
+    id: pairId,
+    reserve0: 0,
+    reserve1: 0,
+    price: 0,
+    timestamp: block.timestamp,
+    synced: block.number,
+    tx: tx.transaction_hash,
   };
+  const existingPair = await loadPair(pairId, mysql);
+  if (existingPair) {
+    pair = existingPair;
+  }
 
-  // table names are `lowercase(TypeName)s` and can be interacted with sql
-  await mysql.queryAsync('INSERT IGNORE INTO posts SET ?', [post]);
+  // Update reserves
+  pair.reserve0 = convertToDecimal(data.reserve0, 18);
+  pair.reserve1 = convertToDecimal(data.reserve1, 18);
+
+  // Calculate the price
+  const price = pair.reserve0 / convertToDecimal(data.amount0In, 18);
+
+  // Update the pair
+  pair.price = price;
+  pair.timestamp = block.timestamp;
+  pair.synced = block.block_number;
+  pair.tx = tx.transaction_hash;
+
+  if (price > parseInt(process.env.TARGET!)) {
+    // Insert your swap method here
+  }
+
+  // Save or update the pair in the database
+  await updatePair(pair, mysql);
 }
