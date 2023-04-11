@@ -2,6 +2,16 @@ import { getAddress } from '@ethersproject/address';
 import { BigNumber } from '@ethersproject/bignumber';
 import { shortStringArrToStr } from '@snapshot-labs/sx/dist/utils/strings';
 import { SplitUint256 } from '@snapshot-labs/sx/dist/utils/split-uint256';
+import * as starknet from 'starknet';
+
+const provider = new starknet.Provider({
+  sequencer: {
+    baseUrl: 'https://alpha4.starknet.io',
+    feederGatewayUrl: 'feeder_gateway',
+    gatewayUrl: 'gateway',
+    network: 'goerli-alpha'
+  }
+});
 
 export type Pair = {
   id: string;
@@ -73,4 +83,13 @@ export function getEvent(data: string[], format: string) {
     if (param.endsWith('_len')) len = parseInt(BigInt(data[next]).toString());
   });
   return event;
+}
+
+// Check if the last block has been synced
+export async function synced(block): Promise<boolean> {
+  const lastBlock = await provider.getBlock()
+  if (block.block_number >= lastBlock.block_number)
+    return true
+  else
+    return false
 }
