@@ -47,9 +47,7 @@ export async function loadPair(pairId: string, mysql): Promise<Pair | null> {
 }
 
 export async function createPair(pair: Pair, mysql): Promise<void> {
-  await mysql.queryAsync(
-    'INSERT INTO pairs SET ?', [pair]
-  );
+  await mysql.queryAsync('INSERT INTO pairs SET ?', [pair]);
 }
 
 export async function updatePair(pair: Pair, mysql): Promise<void> {
@@ -87,9 +85,7 @@ export function getEvent(data: string[], format: string) {
 
 // Check if the last block has been synced
 export async function synced(block): Promise<boolean> {
-  const lastBlock = await provider.getBlock()
-  if (block.block_number >= lastBlock.block_number)
-    return true
-  else
-    return false
+  const lastBlock = await provider.getBlock();
+  if (block.block_number >= lastBlock.block_number) return true;
+  else return false;
 }

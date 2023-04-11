@@ -1,5 +1,13 @@
 import type { CheckpointWriter } from '@snapshot-labs/checkpoint';
-import { convertToDecimal, createPair, getEvent, loadPair, Pair, updatePair, synced } from './utils/utils';
+import {
+  convertToDecimal,
+  createPair,
+  getEvent,
+  loadPair,
+  Pair,
+  updatePair,
+  synced
+} from './utils/utils';
 
 export async function handleSync({ block, tx, rawEvent, mysql }: Parameters<CheckpointWriter>[0]) {
   if (!rawEvent) return;
@@ -15,7 +23,7 @@ export async function handleSync({ block, tx, rawEvent, mysql }: Parameters<Chec
     price: 0,
     timestamp: block!.timestamp,
     synced: block!.block_number,
-    tx: tx.transaction_hash!,
+    tx: tx.transaction_hash!
   };
   const existingPair = await loadPair(pairId, mysql);
   if (existingPair) {
@@ -36,14 +44,14 @@ export async function handleSync({ block, tx, rawEvent, mysql }: Parameters<Chec
   pair.tx = tx.transaction_hash!;
 
   // Take profit
-  if (price >= parseInt(process.env.TARGET!) && await synced(block)) {
-    console.log("Alert! Pair price just reached take profit target!")
+  if (price >= parseInt(process.env.TARGET!) && (await synced(block))) {
+    console.log('Alert! Pair price just reached take profit target!');
     // Insert your swap method here
   }
 
   // Stop loss
-  if (price <= parseInt(process.env.TARGET!) && await synced(block)) {
-    console.log("Alert! Pair price just reached stop loss target!")
+  if (price <= parseInt(process.env.TARGET!) && (await synced(block))) {
+    console.log('Alert! Pair price just reached stop loss target!');
     // Insert your swap method here
   }
 

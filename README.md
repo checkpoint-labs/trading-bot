@@ -33,6 +33,7 @@ docker-compose up -d
 ## Test it
 
 To test it you need to setup 2 environment variables:
+
 ```bash
 PAIR=<PAIR_ADDRESS>
 TARGET=<TARGET_PRICE>
@@ -64,9 +65,8 @@ GM! Did you know that you can also build trading bots with Checkpoint?? Today we
 
 4. Cette pair nous allons aussi la definir dans notre .env ainsi que nos target de profit et d'arret de perte comme ceci:
 
-
-5. Dans notre schema nous allons stocker les donnee suivante pour notre pair entity: 
-<schema>
+5. Dans notre schema nous allons stocker les donnee suivante pour notre pair entity:
+   <schema>
 
 6. Voila nous avons mis en place notre structure il faut maintenant que nous traitons nos donnees recus a chaques event. Pour cela rien de plus simple, comme d'habitude nous recuperons la pair, si celle ci existe ou nous la creeons dans le cas contraire.
 
