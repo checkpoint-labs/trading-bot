@@ -1,8 +1,8 @@
 type Pair {
   id: String! # Pair id
-  reserve0: Int! # Reserve of token 0
-  reserve1: Int! # Reserve of token 1
-  price: Int! # Updated price
+  reserve0: Float! # Reserve of token 0
+  reserve1: Float! # Reserve of token 1
+  price: Float! # Updated price
   timestamp: Int! # Last timestamp where this entry was modified
   synced: Int! # Last block where this entry was modified
   tx: String # Last transaction that modified this entry

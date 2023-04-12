@@ -42,8 +42,8 @@ export const hexStrArrToStr = (data: string[], start: number, length: number | b
 };
 
 export async function loadPair(pairId: string, mysql): Promise<Pair | null> {
-  const [rows] = await mysql.queryAsync('SELECT * FROM pairs WHERE id = ?', [pairId]);
-  return rows.length > 0 ? rows[0] : null;
+  const pair = await mysql.queryAsync('SELECT * FROM pairs WHERE id = ?', [pairId]);
+  return pair.length > 0 ? pair[0] : null;
 }
 
 export async function createPair(pair: Pair, mysql): Promise<void> {
@@ -85,7 +85,7 @@ export function getEvent(data: string[], format: string) {
 
 // Check if the last block has been synced
 export async function synced(block): Promise<boolean> {
-  const lastBlock = await provider.getBlock();
+  const lastBlock = await provider.getBlock('latest');
   if (block.block_number >= lastBlock.block_number) return true;
   else return false;
 }

@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
@@ -6,6 +5,13 @@ import fs from 'fs';
 import Checkpoint, { LogLevel } from '@snapshot-labs/checkpoint';
 import config from './config.json';
 import * as writers from './writers';
+import * as dotenv from 'dotenv';
+dotenv.config();
+
+// Setting up network_node_url
+if (process.env.NETWORK_NODE_URL) {
+  config.network_node_url = process.env.NETWORK_NODE_URL;
+}
 
 const dir = __dirname.endsWith('dist/src') ? '../' : '';
 const schemaFile = path.join(__dirname, `${dir}../src/schema.gql`);
